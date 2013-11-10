@@ -1,0 +1,432 @@
+/************ general *****************/
+
+* {
+  font-size: 12px;
+  font-family: sans-serif;
+  
+  -moz-user-select: -moz-none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+body {
+  background: url("../images/wall-paper-1.png") repeat;
+}
+
+body, div, span, img, h1, h2, h3, h4, h5, h6, form, table, td, tr, p {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+input[type="button"] {  /* Firefox pone un feo margin/padding a los botones */
+  margin: 0;
+  padding: 0;
+}
+
+input[type="text"] {
+  margin: 0;
+  padding: 0;
+}
+
+input[type="checkbox"] {
+  margin: 0px;
+}
+
+
+.spacer {
+  clear: both;
+}
+
+
+
+/***************** CSS transforms *************/
+@-webkit-keyframes RetroRTC-earphone-ringing {
+  0%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+  50%   {
+    -webkit-transform: rotate(1deg);
+    -moz-transform: rotate(1deg);
+    transform: rotate(1deg);
+  }
+  100%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+}
+@-moz-keyframes RetroRTC-earphone-ringing {
+  0%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+  50%   {
+    -webkit-transform: rotate(1deg);
+    -moz-transform: rotate(1deg);
+    transform: rotate(1deg);
+  }
+  100%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+}
+@keyframes RetroRTC-earphone-ringing {
+  0%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+  50%   {
+    -webkit-transform: rotate(1deg);
+    -moz-transform: rotate(1deg);
+    transform: rotate(1deg);
+  }
+  100%   {
+    -webkit-transform: rotate(-1deg);
+    -moz-transform: rotate(-1deg);
+    transform: rotate(-1deg);
+  }
+}
+
+
+
+
+/***************** #Logo ***************/
+#Logo {
+  position: fixed;
+  width: 200px;
+  height: 144px;
+  top: 10px;
+  left: 50%;
+  margin-left: -100px;
+  background: url("../images/RetroRTC.png") no-repeat;
+  -webkit-transform: rotate(6deg);
+  -moz-transform: rotate(6deg);
+  transform: rotate(6deg);
+  -webkit-transition-duration: 0.2s;
+  -moz-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+#Logo.hit {
+  -webkit-transform: rotate(-4deg);
+  -moz-transform: rotate(-4deg);
+  transform: rotate(-4deg);
+}
+
+
+
+
+/***************** #RetroRTC ***************/
+#RetroRTC {
+  position: absolute;
+  width: 420px;
+  height: 368px;
+  bottom: 50px;
+  left: 50%;
+  margin-left: -210px;
+  z-index: 10;
+  -webkit-transition-duration: 0.25s;
+  -moz-transition-duration: 0.25s;
+  transition-duration: 0.25s;
+}
+
+#RetroRTC.hangingUp {
+  bottom: 40px;
+  -webkit-transition-duration: 0.05s;
+  -moz-transition-duration: 0.05s;
+  transition-duration: 0.05s;
+}
+
+#RetroRTC.pickingUp {
+  bottom: 46px;
+  -webkit-transition-duration: 0.01s;
+  -moz-transition-duration: 0.01s;
+  transition-duration: 0.01s;
+}
+
+#RetroRTC .earphone {
+  position: absolute;
+  width: 409px;
+  height: 151px;
+  left: -204px;
+  margin-left: 50%;
+  top: 0;
+  background: url("../images/earphone.png") no-repeat;
+  z-index: 2;
+  cursor: pointer;
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  transform: rotate(0deg);
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
+}
+
+#RetroRTC .earphone.up {
+  top: -55px;
+  margin-left: 60%;
+  -webkit-transform: rotate(15deg);
+  -moz-transform: rotate(15deg);
+  transform: rotate(15deg);
+  -webkit-transition-duration: 0.25s;
+  -moz-transition-duration: 0.25s;
+  transition-duration: 0.25s;
+}
+
+#RetroRTC .earphone.ringing {
+  -webkit-animation: RetroRTC-earphone-ringing 0.2s ease 0s infinite;
+  -moz-animation: RetroRTC-earphone-ringing 0.2s ease 0s infinite;
+  animation: RetroRTC-earphone-ringing 0.2s ease 0s infinite;
+}
+
+#RetroRTC .base {
+  position: absolute;
+  width: 264px;
+  height: 303px;
+  left: 50%;
+  margin-left: -132px;
+  bottom: 0;
+  background: url("../images/base.png") no-repeat;
+  z-index: 4;
+}
+
+#RetroRTC .shadow {
+  width: 326px;
+  height: 339px;
+  margin: 0 auto;
+  margin-top: 64px;
+  background: url("../images/phone-shadow.png") no-repeat;
+  z-index: 1;
+  opacity: 0.5;
+  position: relative;
+}
+
+#RetroRTC .base .wheel {
+  position: absolute;
+  width: 172px;
+  height: 172px;
+  left: 50%;
+  margin-left: -86px;
+  bottom: 69px;
+  background: url("../images/wheel.png") no-repeat;
+  -webkit-transition-duration: 0s;
+  -moz-transition-duration: 0s;
+  transition-duration: 0s;
+}
+
+#RetroRTC .base .wheel .digit {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+#RetroRTC .base .wheel.disabled .digit {
+  cursor: default;
+}
+
+#RetroRTC .base .wheel .digit.one { right: 27px; top: 27px; }
+#RetroRTC .base .wheel .digit.two { right: 57px; top: 10px; }
+#RetroRTC .base .wheel .digit.three { left: 57px; top: 10px; }
+#RetroRTC .base .wheel .digit.four { left: 27px; top: 27px; }
+#RetroRTC .base .wheel .digit.five { left: 10px; top: 57px; }
+#RetroRTC .base .wheel .digit.six { left: 10px; bottom: 57px; }
+#RetroRTC .base .wheel .digit.seven { left: 27px; bottom: 27px; }
+#RetroRTC .base .wheel .digit.eight { left: 57px; bottom: 10px; }
+#RetroRTC .base .wheel .digit.nine { right: 57px; bottom: 10px; }
+#RetroRTC .base .wheel .digit.zero { right: 27px; bottom: 27px; }
+
+#RetroRTC .base .doorstop {
+  position: absolute;
+  width: 37px;
+  height: 20px;
+  right: 45px;
+  top: 165px;
+  background: url("../images/doorstop.png") no-repeat;
+  -webkit-transition-duration: 0.1s;
+  -moz-transition-duration: 0.1s;
+  transition-duration: 0.1s;
+  -webkit-transition-timing-function: linear;
+  -moz-transition-timing-function: linear;
+  transition-timing-function: linear;
+}
+
+#RetroRTC .base .doorstop.pressed {
+  top: 170px;
+}
+
+#RetroRTC .unregister-all {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  left: 50%;
+  margin-left: -20px;
+  bottom: 0px;
+}
+
+#RetroRTC .table {
+  position: fixed;
+  width: 1000px;
+  height: 121px;
+  left: 50%;
+  margin-left: -500px;
+  bottom: -1px;
+  background: url("../images/table-1.png") no-repeat;
+}
+
+#RetroRTC .table .vase {
+  position: absolute;
+  width: 216px;
+  height: 319px;
+  right: 80px;
+  bottom: 50px;
+  z-index: 1;
+  background: url("../images/vase-2.png") no-repeat;
+  -webkit-transition-duration: 0.4s;
+  -moz-transition-duration: 0.4s;
+  transition-duration: 0.4s;
+}
+
+#RetroRTC .table .vase.hit {
+  right: -60px;
+  bottom: -30px;
+  -webkit-transform: rotate(82deg);
+  -moz-transform: rotate(82deg);
+  transform: rotate(82deg);
+}
+
+
+
+
+
+/****************** frame *************/
+
+#frameContainer {
+  position: absolute;
+  width: 350px;
+  height: 293px;
+  top: 4%;
+  left: 2%;
+  -webkit-transform: rotate(-1deg);
+  -moz-transform: rotate(-1deg);
+  transform: rotate(-1deg);
+  -webkit-transition-duration: 0.4s;
+  -moz-transition-duration: 0.4s;
+  transition-duration: 0.4s;
+}
+#frameContainer.hit {
+  -webkit-transform: rotate(3deg);
+  -moz-transform: rotate(3deg);
+  transform: rotate(3deg);
+}
+
+#frameContainer .frame {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: url("../images/frame.png") no-repeat;
+}
+
+#frameContainer video {
+  position: absolute;
+  z-index: 1;
+  left: 59px;
+  top: 56px;
+  width: 228px;
+  height: 172px;
+}
+
+
+
+
+/****************** mirror *************/
+
+#mirrorContainer {
+  position: absolute;
+  width: 263px;
+  height: 367px;
+  top: 6%;
+  right: 4%;
+  cursor: pointer;
+  -webkit-transform: rotate(2deg);
+  -moz-transform: rotate(2deg);
+  transform: rotate(2deg);
+  -webkit-transition-duration: 0.4s;
+  -moz-transition-duration: 0.4s;
+  transition-duration: 0.4s;
+}
+#mirrorContainer.hit {
+  -webkit-transform: rotate(8deg);
+  -moz-transform: rotate(8deg);
+  transform: rotate(8deg);
+}
+
+#mirrorContainer .mirror {
+  position: absolute;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  background: url("../images/mirror-2.png") no-repeat;
+}
+
+#mirrorContainer video {
+  position: absolute;
+  z-index: 1;
+  height: 184px;
+  width: auto;
+  left: 9px;
+  top: 90px;
+}
+
+
+
+
+
+/****************** postit *************/
+
+#postit {
+  position: fixed;
+  width: 150px;
+  height: 139px;
+  bottom: 24%;
+  left: 16%;
+  background: url("../images/postit.png") no-repeat;
+  -webkit-transform: rotate(-15deg);
+  -moz-transform: rotate(-15deg);
+  transform: rotate(-15deg);
+}
+
+#postit .text {
+  height: 100%;
+  width: 75%;
+  padding: 20px;
+}
+
+#postit .text div {
+  font-family: "Jose Fernandez", "Comic Sans MS";
+  text-align: center;
+  color: #000080;
+  opacity: 0.8;
+}
+#postit .text .myNumberIs { font-size: 19px; }
+#postit .text .myNumber { font-size: 30px; margin-top: 10px; }
+
+
+
+
+/****************** license ************/
+#license {
+  position: fixed;
+  z-index: 5000;
+  bottom: 10px;
+  right: 10px;
+  width: 80px;
+  height: 15px;
+  background: url("../images/license-CC-by-nc-nd.png") no-repeat;
+}
