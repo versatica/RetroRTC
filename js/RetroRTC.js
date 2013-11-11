@@ -10,8 +10,8 @@ RetroRTC = function() {
     dialTimeout: 4,  // Seconds to wait to start dialing when at least one digit is entered.
     dialTimeoutEmpty: 5,  // Seconds to wait to start dialing when no digit has been entered yet.
     jssip: {
-      uri: "sip:" + myNumber + "@tryit.jssip.net",
-      ws_servers:  [ "ws://ws.tryit.jssip.net:10080" ],
+      uri: "sip:" + myNumber + "@retrortc.versatica.com",
+      ws_servers:  [ "ws://ws1.versatica.com:10080" ],
       display_name: "RetroRTC",
       register: true,
       register_expires: 300,
