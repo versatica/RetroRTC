@@ -86,6 +86,9 @@ RetroRTC = function() {
   // Write my number into the post-it.
   $("#postit .myNumber").html(this.status.myNumber);
   
+  // Activate the video by default.
+  this.dom.mirrorContainer.click();
+  
   // Load JsSIP.
   try {
     this.jssip = new JsSIP.UA(this.conf.jssip);
