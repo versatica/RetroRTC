@@ -1,5 +1,15 @@
-/************ general *****************/
+/*
+ * RetroRTC
+ * Copyright (c) 2013-2014 Versatica <http://www.versatica.com>
+ * Authors:
+ *   Iñaki Baz Castillo <ibc@aliax.net>
+ *   José Luis Millán <jmillan@aliax.net>
+ * Homepage: http://retrortc.versatica.com
+ * License: http://retrortc.versatica.com/LICENSE.txt
+ */
 
+
+/************ general *****************/
 * {
   font-size: 12px;
   font-family: sans-serif;
@@ -20,7 +30,7 @@ body, div, span, img, h1, h2, h3, h4, h5, h6, form, table, td, tr, p {
   border: 0;
 }
 
-input[type="button"] {  /* Firefox pone un feo margin/padding a los botones */
+input[type="button"] {  /* Avoid Firefox's ugly margin/padding in buttons. */
   margin: 0;
   padding: 0;
 }
@@ -38,7 +48,6 @@ input[type="checkbox"] {
 .spacer {
   clear: both;
 }
-
 
 
 /***************** CSS transforms *************/
@@ -95,8 +104,6 @@ input[type="checkbox"] {
 }
 
 
-
-
 /***************** #Logo ***************/
 #Logo {
   position: fixed;
@@ -118,8 +125,6 @@ input[type="checkbox"] {
   -moz-transform: rotate(-4deg);
   transform: rotate(-4deg);
 }
-
-
 
 
 /***************** #RetroRTC ***************/
@@ -302,11 +307,7 @@ input[type="checkbox"] {
 }
 
 
-
-
-
 /****************** frame *************/
-
 #frameContainer {
   position: absolute;
   width: 350px;
@@ -343,10 +344,7 @@ input[type="checkbox"] {
 }
 
 
-
-
 /****************** mirror *************/
-
 #mirrorContainer {
   position: absolute;
   width: 263px;
@@ -385,11 +383,7 @@ input[type="checkbox"] {
 }
 
 
-
-
-
 /****************** postit *************/
-
 #postit {
   position: fixed;
   width: 150px;
@@ -416,17 +410,3 @@ input[type="checkbox"] {
 }
 #postit .text .myNumberIs { font-size: 19px; }
 #postit .text .myNumber { font-size: 30px; margin-top: 10px; }
-
-
-
-
-/****************** license ************/
-#license {
-  position: fixed;
-  z-index: 5000;
-  bottom: 10px;
-  right: 10px;
-  width: 80px;
-  height: 15px;
-  background: url("../images/license-CC-by-nc-nd.png") no-repeat;
-}
