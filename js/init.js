@@ -1,3 +1,14 @@
+/*
+ * RetroRTC
+ * Copyright (c) 2013-2014 Versatica <http://www.versatica.com>
+ * Authors:
+ *   Iñaki Baz Castillo <ibc@aliax.net>
+ *   José Luis Millán <jmillan@aliax.net>
+ * Homepage: http://retrortc.versatica.com
+ * License: http://retrortc.versatica.com/LICENSE.txt
+ */
+
+
 WebRTC = {};
 
 // Chrome.
