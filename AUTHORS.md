@@ -1,7 +1,6 @@
 # AUTHORS
 
 RetroRTC is developed by the [Versatica](http://versatica.com) team:
-
 * website: http://versatica.com
 * github: https://github.com/versatica
 
