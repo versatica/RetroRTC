@@ -11,9 +11,8 @@
 
 /************ general *****************/
 * {
-  font-size: 12px;
   font-family: sans-serif;
-  
+
   -moz-user-select: -moz-none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -351,7 +350,7 @@ input[type="checkbox"] {
   height: 367px;
   top: 6%;
   right: 4%;
-  cursor: pointer;
+  /*cursor: pointer;*/
   -webkit-transform: rotate(2deg);
   -moz-transform: rotate(2deg);
   transform: rotate(2deg);
@@ -370,7 +369,7 @@ input[type="checkbox"] {
   z-index: 2;
   height: 100%;
   width: 100%;
-  background: url("../images/mirror-2.png") no-repeat;
+  background: url("../images/mirror.png") no-repeat;
 }
 
 #mirrorContainer video {
@@ -380,6 +379,10 @@ input[type="checkbox"] {
   width: auto;
   left: 9px;
   top: 90px;
+  -moz-transform: scaleX(-1);
+  -ms-transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
 }
 
 

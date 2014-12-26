@@ -10,12 +10,12 @@
 
 
 RetroRTC = function() {
-  
+
   var self = this;
   var minNumber = 1000;
   var maxNumber = 2999;
   var myNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
-  
+
   this.conf = {
     wheelSpeed: 0.17,  // 0 fastest, 1 slowest.
     dialTimeout: 4,  // Seconds to wait to start dialing when at least one digit is entered.
@@ -28,10 +28,12 @@ RetroRTC = function() {
       register_expires: 300,
       trace_sip: true,
       stun_servers: [ "stun:74.125.132.127:19302" ],
-      use_preloaded_route: false
+      turn_servers: [],
+      use_preloaded_route: false,
+      log: { level: "debug" }
     }
   };
-  
+
   this.dom = $("#RetroRTC");
   this.dom.earphone = this.dom.find(".earphone");
   this.dom.base = this.dom.find(".base");
@@ -44,7 +46,7 @@ RetroRTC = function() {
   this.dom.unregisterAll = $("#RetroRTC .unregister-all");
   this.dom.logo = $("#Logo");
   this.dom.vase = this.dom.find(".vase");
-  
+
   this.status = {
     myNumber: myNumber,
     earphone: "down",  // "down" / "up" / "moving" / "ringing".
@@ -55,7 +57,7 @@ RetroRTC = function() {
     lineReady: false,
     currentCall: null
   };
-  
+
   // Audio player for the phone and line.
   this.phonePlayer = new Audio();
   this.phonePlayer.volume = 1;
@@ -90,16 +92,16 @@ RetroRTC = function() {
     digit9: "sounds/rotary-phone-1-nr9.ogg"
   }
   this.preloadSounds(this.wheelPlayer.sounds);
-  
+
   // Init events.
   this.initDomEvents();
-  
+
   // Write my number into the post-it.
   $("#postit .myNumber").html(this.status.myNumber);
-  
-  // Activate the video by default.
-  this.dom.mirrorContainer.click();
-  
+
+  // Get local video.
+  this.getLocalMedia();
+
   // Load JsSIP.
   try {
     this.jssip = new JsSIP.UA(this.conf.jssip);
@@ -110,12 +112,12 @@ RetroRTC = function() {
     throw(e);
     return;
   }
-  
+
   // Set JsSIP events.
   this.jssip.on("newRTCSession", function(e) {
     self.onCall(e);
   });
-  
+
   // Run JsSIP.
   this.jssip.start();
 };
@@ -123,7 +125,7 @@ RetroRTC = function() {
 
 RetroRTC.prototype.preloadSounds = function(sounds) {
   var player;
-  
+
   for (var sound in sounds) {
     player = new Audio(sounds[sound]);
     player.volume = 0;
@@ -141,7 +143,7 @@ RetroRTC.prototype.initDomEvents = function() {
     if (self.dom.wheel.hasClass("disabled")) {
       return;
     }
-    
+
     if ($(this).hasClass("zero")) {
       self.onDigitPressed(0);
     } else if ($(this).hasClass("one")) {
@@ -165,52 +167,52 @@ RetroRTC.prototype.initDomEvents = function() {
     }
   });
 
-  
+
   // Earphone clicked.
   this.dom.earphone.mousedown(function() {
     // Moving: abort.
     if (self.status.earphone == "moving") {
       return;
     }
-    
+
     // Pick up.
     else if (self.status.earphone == "down") {
       console.log("earphone pick up");
-      
+
       self.status.earphone = "moving";
       window.setTimeout(function() {
         self.status.earphone = "up";
       }, 500);
-      
+
       $(this).addClass("up");
-      
+
       // Vibrate the phone.
       self.dom.addClass("pickingUp");
       window.setTimeout(function(){
         self.dom.removeClass("pickingUp");
       }, 50);
-      
+
       // Play sound.
       self.phonePlayer.setAttribute("src", self.phonePlayer.sounds.pickUp);
       self.phonePlayer.loop = false;
       self.phonePlayer.play();
-      
+
       // Try to get line.
       if (! self.status.phoneRinging) {
         window.setTimeout(function() {
           // Registered: OK.
           if (self.jssip.isRegistered()) {
             self.status.lineReady = true;
-            
+
             // Play line sound.
             self.phonePlayer.setAttribute("src", self.phonePlayer.sounds.lineReady);
             self.phonePlayer.loop = true;
             self.phonePlayer.play();
-            
+
             // Start dial timer.
             self.startDialTimer();
           }
-          
+
           // Not registered: ERROR
           else {
             // Play sound.
@@ -220,44 +222,46 @@ RetroRTC.prototype.initDomEvents = function() {
           }
         }, 500);
       }
-      
+
       // Answering a call.
       else {
+        var myVideo = self.dom.myVideo[0];  // HTML5 <video> DOM element.
+
         self.status.phoneRinging = false;
         self.dom.earphone.removeClass("ringing");
-        
+
         self.status.currentCall.answer({
-          mediaConstraints: { audio: true, video: self.status.videoEnabled },
-          RTCConstraints: {"optional": [{"DtlsSrtpKeyAgreement": "true"}]} // TODO: Not implemented in JsSIP devel yet.
+          mediaStream: myVideo.stream,
+          mediaConstraints: { audio: true, video: self.status.videoEnabled }
         });
       }
     }
-      
+
     // Hang up phone.
     else if (self.status.earphone == "up") {
       console.log("earphone hang up");
-      
+
       // Stop dial timer.
       self.stopDialTimer();
-      
+
       self.status.earphone = "moving";
       window.setTimeout(function() {
         self.status.earphone = "down";
       }, 250);
-      
+
       $(this).removeClass("up");
-      
+
       window.setTimeout(function(){
         // Play sound.
         self.phonePlayer.setAttribute("src", self.phonePlayer.sounds.hangUp);
         self.phonePlayer.loop = false;
         self.phonePlayer.play();
-        
+
         // Vibrate the phone.
         self.dom.addClass("hangingUp");
         window.setTimeout(function(){
           self.dom.removeClass("hangingUp");
-          
+
           // Wheel hit effect.
           self.dom.wheel.css({
             "-webkit-transform": "rotate(1deg)",
@@ -271,7 +275,7 @@ RetroRTC.prototype.initDomEvents = function() {
               "transform": "rotate(0deg)"
             });
           }, 250);
-          
+
           // Hits!!!
           if (! self.dom.vase.hasClass("hit")) {
             // Hit the vase and logo.
@@ -300,10 +304,10 @@ RetroRTC.prototype.initDomEvents = function() {
                 break;
             };
           }
-          
+
         }, 100);
       }, 50);
-      
+
       // Cancel or terminate current call if there is one.
       if (self.status.currentCall) {
         self.status.currentCall.terminate();
@@ -311,69 +315,14 @@ RetroRTC.prototype.initDomEvents = function() {
       }
     }
   });
-  
-  
-  // Mirror click.
-  this.dom.mirrorContainer.click(function() {
-    var action;
-    
-    if (self.status.currentCall) {
-      alert("cannot (yet) enable/disable video during a call");
-      return;
-    }
-    
-    if (self.status.videoEnabled == null) {
-      return;
-    }
-    else if (self.status.videoEnabled == false) {
-      action = "enableVideo";
-    }
-    else if (self.status.videoEnabled == true) {
-      action = "disableVideo";
-    }
-    
-    self.status.videoEnabled = null;
-    
-    var myVideo = self.dom.myVideo[0];  // HTML5 <video> DOM element.
-    
-    // Enable video.
-    if (action == "enableVideo") {
-      // getUserMedia.
-      WebRTC.getUserMedia(
-        // Media constrains.
-        { video:true, audio:false },
-        // onSuccess.
-        function(stream) {
-          self.status.videoEnabled = true;
-          myVideo.autoplay = true;
-          myVideo.src = window.URL.createObjectURL(stream);
-          myVideo.stream = stream;  // Store the stream for stopping it later.
-        },
-        // onError.
-        function(e) {
-          self.status.videoEnabled = false;
-          console.error(e);
-          alert(e);
-        }
-      );
-    }
-    
-    // Disable video.
-    else if (action == "disableVideo") {
-      self.status.videoEnabled = false;
-      myVideo.stream.stop();
-      myVideo.src = "";
-    }
-    
-  });
-  
-  
+
+
   // Vase clicked.
   this.dom.vase.click(function() {
     $(this).removeClass("hit");
   });
-  
-  
+
+
   // Unregister all.
   this.dom.unregisterAll.click(function() {
     self.jssip.unregister({all: true});
@@ -384,10 +333,10 @@ RetroRTC.prototype.initDomEvents = function() {
 RetroRTC.prototype.onDigitPressed = function(digit) {
   var self = this;
   var sound, duration, angle;
-  
+
   // Disable the wheel until animation ends.
   this.dom.wheel.addClass("disabled");
-  
+
   switch(digit) {
     case 1:
       angle = 60;
@@ -430,14 +379,14 @@ RetroRTC.prototype.onDigitPressed = function(digit) {
       sound = this.wheelPlayer.sounds.digit0;
       break;
   }
-  
+
   // Play wheel sound.
   this.wheelPlayer.setAttribute("src", sound);
   this.wheelPlayer.play();
-  
+
   // Calculate the duration of the wheel animation.
   duration = ( this.conf.wheelSpeed * angle / 60 ) + this.conf.wheelSpeed;
-  
+
   // Turn the wheel until the pressed digit.
   this.dom.wheel.css({
     "-webkit-transition-duration": duration + "s",
@@ -447,7 +396,7 @@ RetroRTC.prototype.onDigitPressed = function(digit) {
     "-moz-transform": "rotate(" + angle + "deg)",
     "transform": "rotate(" + angle + "deg)"
   });
-  
+
   // Movement effect in the doorstop.
   window.setTimeout(function(){
     self.dom.doorstop.addClass("pressed");
@@ -455,7 +404,7 @@ RetroRTC.prototype.onDigitPressed = function(digit) {
       self.dom.doorstop.removeClass("pressed");
     }, 200);
   }, (duration * 1000) * 0.80);
-  
+
   // Move the wheel back to its original position.
   window.setTimeout(function(){
     self.dom.wheel.css({
@@ -475,23 +424,23 @@ RetroRTC.prototype.onDigitPressed = function(digit) {
       });
     }, (duration * 1000) + 50);
   }, (duration * 1000) + 50);
-  
+
   // Enable the wheel again.
   window.setTimeout(function(){
     self.dom.wheel.removeClass("disabled");
   }, (duration * 1000) * 2);
-  
+
   // Use the digit.
   if (self.status.lineReady) {
     console.log("digit " + digit + " entered");
     this.status.dialedNumber = this.status.dialedNumber + digit;
-    
+
     // End line ready sound.
     window.setTimeout(function() {
       self.phonePlayer.setAttribute("src", "");
       self.phonePlayer.loop = false;
     }, 300);
-    
+
     // Run the dial timer.
     this.startDialTimer();
   }
@@ -501,43 +450,43 @@ RetroRTC.prototype.onDigitPressed = function(digit) {
 RetroRTC.prototype.startDialTimer = function() {
   var self = this;
   var timeout;
-  
+
   window.clearTimeout(this.status.dialTimer);
-  
+
   if (this.status.dialedNumber) {
     timeout = this.conf.dialTimeout * 1000;
   } else {
     timeout = this.conf.dialTimeoutEmpty * 1000;
   }
-  
+
   this.status.dialTimer = window.setTimeout(function() {
     // Terminate line.
     self.status.lineReady = false;
-    
+
     // If no number has been entered, fail.
     if (! self.status.dialedNumber) {
       console.log("canceling line");
-      
+
       // Play error tone.
       self.phonePlayer.setAttribute("src", self.phonePlayer.sounds.lineError);
       self.phonePlayer.loop = false;
       self.phonePlayer.play();
     }
-    
+
     // Otherwise initiate a call.
     else {
       console.log("calling to " + self.status.dialedNumber);
-      
+
+      var myVideo = self.dom.myVideo[0];  // HTML5 <video> DOM element.
+
       // End line sound.
       self.phonePlayer.setAttribute("src", "");
       self.phonePlayer.loop = false;
-      
+
       try {
         self.jssip.call(self.status.dialedNumber, {
-          mediaConstraints: { audio: true, video: self.status.videoEnabled },
-          RTCConstraints: {
-            "optional": [{"DtlsSrtpKeyAgreement": "true"}]
-          }
+          mediaStream: myVideo.stream,
+          mediaConstraints: { audio: true, video: self.status.videoEnabled }
         });
       } catch(e){
         console.error("ERROR calling:");
@@ -552,10 +501,10 @@ RetroRTC.prototype.startDialTimer = function() {
 
 RetroRTC.prototype.stopDialTimer = function() {
   window.clearTimeout(this.status.dialTimer);
-  
+
   // Terminate line.
   this.status.lineReady = false;
-  
+
   // Empty the dialed number.
   this.status.dialedNumber = "";
 };
@@ -565,16 +514,16 @@ RetroRTC.prototype.onCall = function(e) {
   var self = this;
   var request = e.data.request;
   var call = e.data.session;
-  
+
   // Store the current call.
   this.status.currentCall = call;
-  
+
   console.log(call.direction + " incoming call from " + call.remote_identity.uri.user);
-  
+
   // Incoming call.
   if (call.direction === 'incoming') {
     console.log("incoming call from " + call.remote_identity.uri.user);
-    
+
     // If cannot receive the call reject with Busy.
     if (this.status.earphone != "down" || this.status.phoneRinging) {
       console.log("incoming call rejected with Busy");
@@ -582,23 +531,23 @@ RetroRTC.prototype.onCall = function(e) {
       this.status.currentCall = null;
       return;
     }
-    
+
     this.status.phoneRinging = true;
-    
+
     // Vibration effect.
     this.dom.earphone.addClass("ringing");
-    
+
     // Play sound.
     this.phonePlayer.setAttribute("src", this.phonePlayer.sounds.phoneRinging);
     this.phonePlayer.loop = true;
     this.phonePlayer.play();
   }
-  
+
   // Call ringing.
   call.on("progress", function(e) {
     console.log("call " + e.type + ":");
     console.log(e.data);
-    
+
     // Local call (avoid multiple ringings).
     if (call.direction == "outgoing" && self.phonePlayer.getAttribute("src") != self.phonePlayer.sounds.lineRinging) {
       // Play simulated ringing.
@@ -607,18 +556,18 @@ RetroRTC.prototype.onCall = function(e) {
       self.phonePlayer.play();
     }
   });
-  
+
   // Call answered.
-  call.on("started", function(e) {
+  call.on("accepted", function(e) {
     console.log("call " + e.type + ":");
     console.log(e.data);
-    
+
     // End current sound.
     self.phonePlayer.setAttribute("src", "");
     self.phonePlayer.loop = false;
     self.phonePlayer.setAttribute("src", "");
     self.phonePlayer.loop = false;
-    
+
     // Attach the remote media stream(s) and show its video.
     if ( call.getRemoteStreams().length > 0) {
       var remoteVideo = self.dom.remoteVideo[0];
@@ -626,26 +575,26 @@ RetroRTC.prototype.onCall = function(e) {
       remoteVideo.play();
     }
   });
-    
+
   // Call canceled.
   call.on("failed", function(e) {
     console.log("call " + e.type + ":");
     console.log(e.data);
-    
+
     self.status.currentCall = null;
-    
+
     // Remote call canceled by the remote phone.
     if (call.direction == "incoming" && e.data.originator != "local") {
       self.status.phoneRinging = false;
-      
+
       // Remove vibration effect.
       self.dom.earphone.removeClass("ringing");
-      
+
       // End current sound.
       self.phonePlayer.setAttribute("src", "");
       self.phonePlayer.loop = false;
     }
-    
+
     // Local call rejected by the remote phone.
     else if (call.direction == "outgoing" && e.data.originator == "remote") {
       switch(e.data.cause) {
@@ -668,12 +617,12 @@ RetroRTC.prototype.onCall = function(e) {
           break;
       }
     }
-    
+
     // Local call rejected by local or system issues (WebRTC, getUserMedia...).
     else if (call.direction == "outgoing" && e.data.originator != "remote") {
       switch(e.data.cause) {
         case JsSIP.C.causes.CANCELED:
-        case JsSIP.C.causes.NO_ANSWER: 
+        case JsSIP.C.causes.NO_ANSWER:
         case JsSIP.C.causes.EXPIRES:
           break;
         default:
@@ -684,19 +633,19 @@ RetroRTC.prototype.onCall = function(e) {
       }
     }
   });
-    
+
   // Ended call (was answered).
   call.on("ended", function(e) {
     console.log("call " + e.type + ":");
     console.log(e.data);
-    
+
     self.status.currentCall = null;
-    
+
     // Remove remote stream.
     var remoteVideo = self.dom.remoteVideo[0];
     remoteVideo.src = "";
     remoteVideo.pause();
-    
+
     if (e.data.originator != "local") {
       // Play line off hook sound.
       self.phonePlayer.setAttribute("src", self.phonePlayer.sounds.lineOffHook);
@@ -704,4 +653,30 @@ RetroRTC.prototype.onCall = function(e) {
       self.phonePlayer.play();
     }
   });
+};
+
+
+RetroRTC.prototype.getLocalMedia = function() {
+  var self = this;
+  var myVideo = this.dom.myVideo[0];  // HTML5 <video> DOM element.
+
+  // getUserMedia.
+  WebRTC.getUserMedia(
+    // Media constrains.
+    { video:true, audio:true },
+    // onSuccess.
+    function(stream) {
+      self.status.videoEnabled = true;
+      myVideo.autoplay = true;
+      myVideo.src = window.URL.createObjectURL(stream);
+      myVideo.stream = stream;  // Store the stream for stopping it later.
+      myVideo.muted = true;
+    },
+    // onError.
+    function(e) {
+      self.status.videoEnabled = false;
+      console.error(e);
+      alert(e);
+    }
+  );
 };
